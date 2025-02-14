@@ -113,9 +113,11 @@ def balanced_ordering(graph: Graph):
         moved = False  # Flag to track if any movement occurs
 
         if opposite(v, w, type_v, type_w, order) and 1 <= succ_index(v, w, ordered_v) <= math.floor(abs(type_v[0] - type_v[1]) / 2):
+            #print(f"executing move 1")
             move1(order, v, w)
             moved = True
-        elif opposite(w, v, type_w, type_v, order) and 1 <= succ_index(w, v, ordered_w) <= math.floor(abs(type_w[0] - type_w[1]) / 2):
+        elif opposite(w, v, type_w, type_v, order) and 1 <= pred_index(v, w, ordered_v) <= math.floor(abs(type_w[0] - type_w[1]) / 2):
+            #print(f"executing move 1opp")
             move1opp(order, v, w)
             moved = True
         elif opposite(v, w, type_v, type_w, order) and ordered_v.index(w) > v_in_v + 2:
@@ -125,6 +127,7 @@ def balanced_ordering(graph: Graph):
                         i = succ_index(v, vi, ordered_v)
                         j = pred_index(w, wj, ordered_w)
                         if 1 <= i <= math.floor((type_v[0] - type_v[1]) / 2) and 1 <= j <= math.floor((type_w[0] - type_w[1]) / 2):
+                            #print(f"executing move 2")
                             move2(order, v, w, vi, wj)
                             moved = True
                             break
@@ -137,6 +140,7 @@ def balanced_ordering(graph: Graph):
                         i = pred_index(v, vi, ordered_v)
                         j = succ_index(w, wj, ordered_w)
                         if 1 <= i <= math.floor((type_v[0] - type_v[1]) / 2) and 1 <= j <= math.floor((type_w[0] - type_w[1]) / 2):
+                            #print(f"executing move 2opp")
                             move2(order, w, v, wj, vi)
                             moved = True
                             break
@@ -148,6 +152,7 @@ def balanced_ordering(graph: Graph):
                     i = succ_index(v, vi, ordered_v)
                     j = pred_index(w, vi, ordered_w)
                     if 1 <= i <= math.floor(abs(type_v[0] - type_v[1]) / 2 - 1) and 1 <= j <= math.floor(abs(type_w[0] - type_w[1]) / 2 - 1):
+                        #print(f"executing move 3")
                         move3(order, v, w, vi)
                         moved = True
                         break
@@ -157,12 +162,12 @@ def balanced_ordering(graph: Graph):
                     j = succ_index(w, wj, ordered_w)
                     i = pred_index(v, wj, ordered_v)
                     if 1 <= i <= math.floor(abs(type_v[0] - type_v[1]) / 2 - 1) and 1 <= j <= math.floor(abs(type_w[0] - type_w[1]) / 2 - 1):
+                        #print(f"executing move 3opp")
                         move3(order, w, v, wj)
                         moved = True
                         break
         elif len(ordered_v) - 1 == degree:
-            floor = math.floor(abs((type_v[0] - type_v[1]) / 2))
-            if floor <1:
+            if type_v[0] - type_v[1] == 0:
                 unbalanced = False
             else:
                 unbalanced = True
@@ -175,6 +180,7 @@ def balanced_ordering(graph: Graph):
                             unbalanced = False
                             break
                     if unbalanced:
+                        #print(f"executing move 4 on {edge}")
                         move4(order, v, type_v)
                         moved = True
                 else:
@@ -186,11 +192,11 @@ def balanced_ordering(graph: Graph):
                             unbalanced = False
                             break
                     if unbalanced:
+                        #print(f"executing move 4opp")
                         move4opp(order, v, type_v)
                         moved = True
         elif len(ordered_w) - 1 == degree:
-            floor = math.floor(abs((type_w[0] - type_w[1]) / 2))
-            if floor <1:
+            if (type_w[0] - type_w[1]) == 0:
                 unbalanced = False
             else:
                 unbalanced = True
@@ -203,9 +209,10 @@ def balanced_ordering(graph: Graph):
                             unbalanced = False
                             break
                     if unbalanced:
+                        #print(f"executing move 4")
                         move4(order, w, type_w)
                         moved = True
-                else:
+                elif type_w[0] < type_w[1]:
                     for i in range(1, math.floor(abs((type_w[0] - type_w[1]) / 2)) + 1):
                         wi = ordered_w[w_in_w - i]
                         ordered_wi = order_neighbor(order, list(graph.neighbors(wi)) + [wi])
@@ -214,16 +221,17 @@ def balanced_ordering(graph: Graph):
                             unbalanced = False
                             break
                     if unbalanced:
+                        #print(f"executing move 4opp")
                         move4opp(order, w, type_w)
                         moved = True
 
         if moved:
             # If a movement occurred, extend `check` with edges of affected neighbors
-            for x in set(graph.neighbors(v)).union(graph.neighbors(w)):
-                for edge in graph.edges(x, data=False):
+            for x in set(graph.neighbors(v)).union(set(graph.neighbors(w))):
+                for e in graph.edges(x, data=False):
                     in_check = False
-                    for edge2 in check:
-                        if ((edge[0] == edge2[0] and edge[1] == edge2[1]) or (edge[1] == edge2[0] and edge[0] == edge2[1])):
+                    for e2 in check:
+                        if ((e[0] == e2[0] and e[1] == e2[1]) or (e[1] == e2[0] and e[0] == e2[1])):
                             in_check = True
                     #if edge not in check:  # Check if the edge is already in `check`
                     if not in_check:
@@ -231,5 +239,5 @@ def balanced_ordering(graph: Graph):
         else:
             # If no movement occurred, remove the edge from the check list
             check.remove(edge)
-
+        #print(check)
     return order
